@@ -1,14 +1,13 @@
-#Asynchronous UART
-
-##Initialisation
 
 For EUSART1 to be used the following must occur:
 - SPEN(RCSTA1<7>)must be set (=1)
 - For Asynchronous and Synchronous Master modes, TRISx<x> must be cleared (= 0)
 - For Synchronous Slavemode, TRISx<x> must be set (= 1)
 
-###For Asynchronous Operation of EUSART1:
-####Setup
+#Asynchronous UART
+Using EUSART1 as an example.
+
+##Initialisation
 ```c
 RCSTA1bits.SPEN = 1;
 TRISBITS.TRISC6 = 0;
@@ -54,7 +53,7 @@ As a result for a 250 kbps communication, at 16 MHz, with the 16-bit timer. The 
 SPBRGH1 = 0;
 SPBRG1 = 3;
 ```
-####Transmission
+##Transmission
 
 Enable transmission, and load data.
 
@@ -69,3 +68,13 @@ Optionally wait until the byte is sent
 while(TXTA1bits.TRMT == 0);
 ```
 
+##Reception
+
+Poll RC1IF untill its set, then read in the data.
+
+```c
+
+if(RC1IF == 1) {
+  data = RCREG1;
+}
+```  
