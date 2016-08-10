@@ -1,6 +1,6 @@
 Going through the CAN file:
 
-''' c
+'''c
 #include<pic18f46k80.h>
 #include <xc.h>
 #include "CAN.h"
@@ -11,13 +11,15 @@ extern unsigned char data[8];
 #Initialise Function
 CAN needs to be in CONFIG mode to edit the following settings, in order to get there it must shut it the module down and restat it in config mode. We do that by editing CANCONbits.REQOP (Bits 7-5).
 
-''' c
+'''c
 CANCON = 0b10000000;
 '''
 
-/*To ensure we don't proceed before we have changed to CONFIG mode, we check
-* CANSTATbits.OPMODE and wait for it to change to 0b100*/
+To ensure we don't proceed before we have changed to CONFIG mode, we check poll CANSTATbits.OPMODE and wait for it to change to 0b100; indicating it has gone into the correct mode.
+
+'''c
 while(!(CANSTATbits.OPMODE == 0b100));
+'''
 
 /* The PIC's CAN module has 3 modes, 2 of which are "CAN" and "ECAN"
 * (see pg 439 of datasheet)
