@@ -31,38 +31,37 @@ ECANCON = 0b01000000;
 The can message timing is comprised of many chunks of time, Time Quanta (TQ). The total baudrate is then calculated by how many and how long the TQs are used.
 
 The Nominal Bit Time (NBT), is comprised of 4 individual sections of time, each being comprised of integer numbers of TQs.
+
 ![alt text](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/CAN/TimeSegments.png "Timing Makeup")
 
-Associated with the NBT are the Sample Point, Synchronization
-Jump Width (SJW), and Information Processing
-Time (IPT), which are explained later.
-SYNCHRONIZATION SEGMENT
-The Synchronization Segment (SyncSeg) is the first
-segment in the NBT and is used to synchronize the
-nodes on the bus. Bit edges are expected to occur
-within the SyncSeg. This segment is fixed at 1TQ.
-PROPAGATION SEGMENT
-The Propagation Segment (PropSeg) exists to compensate
-for physical delays between nodes. The propagation
-delay is defined as twice the sum of the signal’s
-propagation time on the bus line, including the delays
-associated with the bus driver. The PropSeg is programmable
-from 1 - 8TQ.
-PHASE SEGMENT 1 AND PHASE SEGMENT 2
-The two phase segments, PS1 and PS2 are used to
-compensate for edge phase errors on the bus. PS1 can
-be lengthened or PS2 can be shortened by resyncronization.
-PS1 is programmable from 1 - 8TQ and PS2 is
-programmable from 2 - 8TQ.
-// Initialize CAN Timing  
-//  Setting Baud Rate
-//  125 Kbps @ 16MHz 
+The Synchronization Segment (SyncSeg) is the first segment in the NBT and is used to synchronize the nodes on the bus. Bit edges are expected to occur within the SyncSeg. This segment is fixed at 1TQ.
 
+The Propagation Segment (PropSeg) exists to compensate for physical delays between nodes. The propagation delay is defined as twice the sum of the signal’s propagation time on the bus line, including the delays associated with the bus driver. The PropSeg is programmable from 1 - 8TQ.
 
-// Thus the timeline for the CAN bit is:
-//  1           1   4       2   = 8 TQ = 1 MBits/s
-// SyncSeg  PropSeg SEG1    SEG2
+The two phase segments, PS1 and PS2 are used to compensate for edge phase errors on the bus. PS1 can be lengthened or PS2 can be shortened by resyncronization. PS1 is programmable from 1 - 8TQ and PS2 is programmable from 2 - 8TQ.
 
+The sample point is the point in the bit time in which the logic level is read and interpreted. The sample point is located at the end of phase segment 1. The exception to this rule is, if the sample mode is configured to sample three times per bit. In this case, the bit is still sampled at the end of PS1, however, two additional samples are taken at one-half TQ intervals prior to the end of PS1 and the value of the bit is determined by a majority decision.
+
+The are several requirements for programming the CAN bit timing segments.
+
+1. PropSeg + PS1 ≥ PS2
+2. PropSeg + PS1 ≥ tPROP
+3. PS2 > SJW
+
+The actual time value for a time quanta is defined as:
+
+```
+TQ = 2 * BRP * Tosc
+NBR = 1/[(Tss + Tps + Tps1 + Tps2)*TQ]
+```
+
+Where the BRP is the baud rate prescaller as defined in the BRGCON1 register. Thus for a 1 MBit/s baud rate running at a 16 MHz we can get a solution set such that:
+
+| SyncSeg  | PropSeg  | SEG1  | SEG2 |
+|:--------:|:--------:|:-----:|:---:|
+| 1  | 1 | 4 |2|
+
+With BRP = 1
 
 //BRGCON1
 
