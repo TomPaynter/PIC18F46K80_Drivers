@@ -8,7 +8,7 @@ For EUSART1 to be used the following must occur:
 - For Synchronous Slavemode, TRISx<x> must be set (= 1)
 
 ###For Asynchronous Operation of EUSART1:
-
+####Setup
 ```c
 RCSTA1bits.SPEN = 1;
 TRISBITS.TRISC6 = 0;
@@ -18,12 +18,12 @@ TRISbits.TRISC7 = 0;
 ![TXTAx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/TXTAx.png)
 
 8 Bit transmission mode.
-Transmit enables
+Transmit disabled, for now
 Asynchronous mode
 *high speed or low speed
 
 ```c
-TXTA1 = 0b00100*000;
+TXTA1 = 0b00000000;
 ```
 
 ![RCSTAx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/RCSTAx.png)
@@ -39,8 +39,33 @@ RCSTA1 = 0b10010000;
 ![BAUDCONx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/BAUDCONx.png)
 Non-inverted logic levels
 Lines idle high.
-*i think we want 8 bitbaud
+16-bit baud rate
+```c
+BAUDCON1 = 0b00001000;
+```
+
+Setting the baud rate for the asynchronous operation of the chip is done with the SPBRGHx:SPBRGx register pair, such that:
+
+![Baud Table](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/baudTable.png)
+
+As a result for a 250 kbps communication, at 16 MHz, with the 16-bit timer. The value of the SPBRGHx:SPBRGx pair must be 3.
 
 ```c
-BAUDCON1 = 0b0000*000;
+SPBRGH1 = 0;
+SPBRG1 = 3;
 ```
+####Transmission
+
+Enable transmission, and load data.
+
+```c
+TXTA1bits.TXEN = 1;
+TXREG1 = data; \\This automatically initiates transmission
+```
+
+Optionally wait until the byte is sent
+
+```c
+while(TXTA1bits.TRMT == 0);
+```
+
