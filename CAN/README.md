@@ -1,32 +1,33 @@
 Going through the CAN file:
 
-'''c
+```c
 #include<pic18f46k80.h>
 #include <xc.h>
 #include "CAN.h"
 
 extern unsigned char data[8];
-'''
+```
 
 #Initialise Function
+##Into Configuration Mode
 CAN needs to be in CONFIG mode to edit the following settings, in order to get there it must shut it the module down and restat it in config mode. We do that by editing CANCONbits.REQOP (Bits 7-5).
 
-'''c
+```c
 CANCON = 0b10000000;
-'''
+```
 
 To ensure we don't proceed before we have changed to CONFIG mode, we check poll CANSTATbits.OPMODE and wait for it to change to 0b100; indicating it has gone into the correct mode.
 
-'''c
+```c
 while(!(CANSTATbits.OPMODE == 0b100));
-'''
+```
 
-/* The PIC's CAN module has 3 modes, 2 of which are "CAN" and "ECAN"
-* (see pg 439 of datasheet)
-* We use "CAN" and "ECAN" is a newer version.
-* enhanced legacy mode mode is basically CAN, but a little bit better
-* Here we set the module to mode 1, enhanced legacy.*/
+The PIC's CAN module has 3 modes, 2 of which are "CAN" and "ECAN" (see pg 439 of datasheet). We use "CAN" and "ECAN" is a newer version, enhanced legacy mode mode is basically CAN, but a little bit better. Here we set the module to mode 1, enhanced legacy.
+
+```c
 ECANCON = 0b01000000;
+```
+##Baudrate Adjustment
 
 // Initialize CAN Timing  
 //  Setting Baud Rate
@@ -55,7 +56,7 @@ BRGCON3bits.SEG2PH = 0b001; //SEG2 is 2*TQ
 
 BSEL0 = 0b11111100;                   //1=TX, 0=RX
 
-/* A bit on Masks and Filters!
+##Masks and Filters!
 	
 A filter is the be all and end all, it decides to accept the data to the buffer or 
 dump it. A filter will be composed of a bit field as long as the ID of the CAN message.
@@ -115,6 +116,8 @@ bits SID<10:3> lie in RXFnSIDH and SID<2:0> are in MSBs of RXFnSIDL.
 Thus the whole SID  is 0000000000100000.*/
 RXB0CON = 0x00;
 RXB1CON = 0x00;
+
+##Normal Mode
 // Now we can set CAN back to normal mode and this allows it to actually use it.
 CANCON = 0b0000000;
 
