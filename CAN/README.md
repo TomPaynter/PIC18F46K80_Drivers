@@ -107,76 +107,93 @@ SEG2 is 2*TQ
 BRGCON3bits.SEG2PH = 0b001;
 ```
 
-BSEL0 = 0b11111100;                   //1=TX, 0=RX
+##Selectable Buffer Types
+There are two recieve only buffers, a few transmit only buffers and 5 either ors. Here we set them all to Tx buffers.
+
+```c
+BSEL0 = 0b11111100;
+```
 
 ##Masks and Filters!
 	
-A filter is the be all and end all, it decides to accept the data to the buffer or 
-dump it. A filter will be composed of a bit field as long as the ID of the CAN message.
+A filter is the be all and end all, it decides to accept the data to the buffer or dump it. A filter will be composed of a bit field as long as the ID of the CAN message. If the CAN ID matches the filter it is let throgut to the buffer and you have the data in a handy dandy package ready to be read.
 
-If the CAN ID matches the filter it is let throgut to the buffer. 
-
-Now the mask is like a wild	card to the filter. If the corresponding mask bit is a 
-1 then the filter bit MUST match the corresponding ID bit in order for it
-to be passed. If its a 0 then it is a dont care bit. ie
+Now the mask is like a wild card to the filter. If the corresponding mask bit is a 1 then the filter bit MUST match the corresponding ID bit in order for it to be passed to the buffer. If its a 0 then it will ignore the filters. ie
 
 Mask = 	0b01101101
 Filter=	0b11011011
+
 Passes=	0bx10x10x1 
 ie	0b11011011
 	0b01011011
 	0b11001001 ect
 
-Think of the mask as a filter bit enable function,  if it is a 0 it disables that filter
-checking ability*/
+Think of the mask as a filter bit enable function, if it is a 0 it disables that filter checking ability for that given bit.
 
-/* Initialize Receive Masks
-The first mask is used that accepts all SIDs */
-RXM0SIDH = 0b11111111; // Standard ID MASK all 1s, meaning the filter must match EXACTLY!
+
+###Initialize Receive Masks and Filters
+The first mask is used that accepts all SIDs. Standard ID MASK all 1s, meaning the filter must match EXACTLY!
+```c
+RXM0SIDH = 0b11111111;
 RXM0SIDL = 0b11100000;
+```
 
-// Enable Filters
-// Only using first three filters
-RXFCON0 = 0b00000111;          //Enable Filters 0,1,2
-RXFCON1 = 0b00000000;          //Disable all others
+Enable Filters. Only using first three filters
+```c
+RXFCON0 = 0b00000111;	//Enable Filters 0,1,2
+RXFCON1 = 0b00000000	//Disable all others
+```
 
-// Assign Filters to Masks
-MSEL0 = 0b11110000;                  //Assign Filters 0 to Mask 0, rest to no mask
-MSEL1 = 0b11111111;                  //Assign Filters 4-7 No mask
-MSEL2 = 0b11111111;                  //Assign Filters 8-11 to No mask
-MSEL3 = 0b11111111;                  //Assign Filters 12-15 to No mask
+Assign Filters to Masks
+```c
+MSEL0 = 0b11110000	//Assign Filters 0 to Mask 0, rest to no mask
+MSEL1 = 0b11111111	//Assign Filters 4-7 No mask
+MSEL2 = 0b11111111	//Assign Filters 8-11 to No mask
+MSEL3 = 0b11111111	//Assign Filters 12-15 to No mask
+```
 
-// Assign Filters to Buffers
-RXFBCON0 = 0b00010000;               //Assign Filter 0 to RXB0, and Filter 1 to RXB1
-RXFBCON1 = 0b11111111;                     //Assign the rest of the buffers with no filter
+Assign Filters to Buffers
+```c
+RXFBCON0 = 0b00010000	//Assign Filter 0 to RXB0, and Filter 1 to RXB1
+RXFBCON1 = 0b11111111	//Assign the rest of the buffers with no filter
 RXFBCON2 = 0b11111111;                     
 RXFBCON3 = 0b11111111;
 RXFBCON4 = 0b11111111;
 RXFBCON5 = 0b11111111;
 RXFBCON6 = 0b11111111;
 RXFBCON7 = 0b11111111;
+```
 
-// Initialize Receive Filters
+Initialize Receive Filters. In this example, we are only passing messages with ID=1 and 2 through to the buffers. The SID has been split between two registers, bits SID<10:3> lie in RXFnSIDH and SID<2:0> are in MSBs of RXFnSIDL.
+
+Thus the whole SID  is 0000000000100000.
+```c
 RXF0SIDH = 0b00000000; // Set to ID1
 RXF0SIDL = 0b00100000;
 
 RXF1SIDH = 0b00000000; // Set to ID2
 RXF1SIDL = 0b01000000;
+```
 
-/* In this case, we are only passing messages with ID=1 and 2 through.
-The SID has been split between  two registers,
-bits SID<10:3> lie in RXFnSIDH and SID<2:0> are in MSBs of RXFnSIDL.
-Thus the whole SID  is 0000000000100000.*/
+Telling the RX buffers 0 and 1 to listern to the filters.
+
+```c
 RXB0CON = 0x00;
 RXB1CON = 0x00;
+```
 
 ##Normal Mode
-// Now we can set CAN back to normal mode and this allows it to actually use it.
-CANCON = 0b0000000;
+Now we can set CAN back to normal mode and this allows it to actually use it.
 
-//Another while loop to check CANSTATbits.OPMODE,
-//and wait for it to change to 0b000 before continuing.
+```c
+CANCON = 0b0000000;
+```
+
+Now to wait to make sure it got into the normalmode. Another while loop to check CANSTATbits.OPMODE, and wait for it to change to 0b000 before continuing.
+
+```c
 while(!(CANSTATbits.OPMODE==0b000));
+```
 
 #Transmit Function
 
