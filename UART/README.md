@@ -15,7 +15,7 @@ TRISBITS.TRISC6 = 0;
 TRISbits.TRISC7 = 0;
 ```
 
-[!TXTAx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/TXTAx.png)
+![TXTAx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/TXTAx.png)
 
 8 Bit transmission mode.
 Transmit enables
@@ -26,7 +26,7 @@ Asynchronous mode
 TXTA1 = 0b00100*000;
 ```
 
-[!RCSTAx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/RCSTAx.png)
+![RCSTAx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/RCSTAx.png)
 
 Enable serial port.
 8 Bit reception
@@ -36,7 +36,7 @@ Enable reciever
 RCSTA1 = 0b10010000;
 ```
 
-[!BAUDCONx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/BAUDCONx.png)
+![BAUDCONx](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/UART/BAUDCONx.png)
 Non-inverted logic levels
 Lines idle high.
 *i think we want 8 bitbaud
