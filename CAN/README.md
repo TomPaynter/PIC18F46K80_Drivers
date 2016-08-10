@@ -31,7 +31,7 @@ ECANCON = 0b01000000;
 The can message timing is comprised of many chunks of time, Time Quanta (TQ). The total baudrate is then calculated by how many and how long the TQs are used.
 
 The Nominal Bit Time (NBT), is comprised of 4 individual sections of time, each being comprised of integer numbers of TQs.
-![alt text](PIC18F46K80_Drivers/CAN/TimeSegments.png "Timing Makeup")
+![alt text](https://github.com/TomPaynter/PIC18F46K80_Drivers/blob/master/CAN/TimeSegments.png "Timing Makeup")
 
 Associated with the NBT are the Sample Point, Synchronization
 Jump Width (SJW), and Information Processing
