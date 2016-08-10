@@ -55,34 +55,57 @@ TQ = 2 * BRP * Tosc
 NBR = 1/[(Tss + Tps + Tps1 + Tps2)*TQ]
 ```
 
-Where the BRP is the baud rate prescaller as defined in the BRGCON1 register. Thus for a 1 MBit/s baud rate running at a 16 MHz we can get a solution set such that:
+Where the BRP is the baud rate prescaller as defined in the BRGCON1 register. Thus for a 1 MBit/s baud rate running at a 16 MHz we can get a solution set such that, With BRP = 1:
 
 | SyncSeg  | PropSeg  | SEG1  | SEG2 |
 |:--------:|:--------:|:-----:|:---:|
 | 1  | 1 | 4 |2|
 
-With BRP = 1
-
-//BRGCON1
-
-BRGCON1bits.SJW = 0b00; // Sync Jump Width is 1 TQ
-BRGCON1bits.BRP = 0; // Baud Rate Prescaler is Tq = 2*(BRP + 1)/Fosc = 0.125 us
 
 
-//BRGCON2
-BRGCON2bits.SEG2PHTS = 1; // Makes the SEG2 fully programmable
-BRGCON2bits.SAM = 0; // On reception the bit is sampled once at the intersection of SEG1 and SEG2
-BRGCON2bits.SEG1PH = 0b011; // SEG1 is 4*TQ
-BRGCON2bits.PRSEG = 0b000; // Propogation time is 1*TQ
+###BRGCON1
+Sync Jump Width is 1 TQ:
+```c
+BRGCON1bits.SJW = 0b00;
+```
+Baud Rate Prescaler is Tq = 2*(BRP + 1)/Fosc = 0.125 us
+```c
+BRGCON1bits.BRP = 0;
+```
 
-//BREGCON3
-BRGCON3bits.WAKDIS = 0; //Enable wakeup from CAN
-BRGCON3bits.WAKFIL = 0; //Disable filters for wakeup
-BRGCON3bits.SEG2PH = 0b001; //SEG2 is 2*TQ
+###BRGCON2
+Make the SEG2 fully programmable
+```c
+BRGCON2bits.SEG2PHTS = 1;
+```
+On reception the bit is sampled once at the intersection of SEG1 and SEG2
+```
+BRGCON2bits.SAM = 0;
+```
+SEG1 is 4*TQ
+```c
+BRGCON2bits.SEG1PH = 0b011;
+```
+Propogation time is 1*TQ
+```
+BRGCON2bits.PRSEG = 0b000;
+```
 
-// Thus the timeline for the CAN bit is:
-//  1           1   4       2   = 8 TQ = 1 MBits/s
-// SyncSeg  PropSeg SEG1    SEG2
+###BREGCON3
+Enable wakeup from CAN
+```c
+BRGCON3bits.WAKDIS = 0;
+```
+
+Disable filters for wakeup
+```c
+BRGCON3bits.WAKFIL = 0;
+```
+
+SEG2 is 2*TQ
+```c
+BRGCON3bits.SEG2PH = 0b001;
+```
 
 BSEL0 = 0b11111100;                   //1=TX, 0=RX
 
