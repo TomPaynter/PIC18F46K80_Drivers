@@ -9,7 +9,7 @@ extern unsigned char data[8];
 ```
 
 #Initialise Function
-##Into Configuration Mode
+##Initial Configuration
 CAN needs to be in CONFIG mode to edit the following settings, in order to get there it must shut it the module down and restat it in config mode. We do that by editing CANCONbits.REQOP (Bits 7-5).
 
 ```c
@@ -28,10 +28,41 @@ The PIC's CAN module has 3 modes, 2 of which are "CAN" and "ECAN" (see pg 439 of
 ECANCON = 0b01000000;
 ```
 ##Baudrate Adjustment
+The can message timing is comprised of many chunks of time, Time Quanta (TQ). The total baudrate is then calculated by how many and how long the TQs are used.
 
+The Nominal Bit Time (NBT), is comprised of 4 individual sections of time, each being comprised of integer numbers of TQs.
+![alt text](PIC18F46K80_Drivers/CAN/Screen Shot 2016-08-10 at 11.42.59 AM.png "Timing Makeup")
+
+Associated with the NBT are the Sample Point, Synchronization
+Jump Width (SJW), and Information Processing
+Time (IPT), which are explained later.
+SYNCHRONIZATION SEGMENT
+The Synchronization Segment (SyncSeg) is the first
+segment in the NBT and is used to synchronize the
+nodes on the bus. Bit edges are expected to occur
+within the SyncSeg. This segment is fixed at 1TQ.
+PROPAGATION SEGMENT
+The Propagation Segment (PropSeg) exists to compensate
+for physical delays between nodes. The propagation
+delay is defined as twice the sum of the signal’s
+propagation time on the bus line, including the delays
+associated with the bus driver. The PropSeg is programmable
+from 1 - 8TQ.
+PHASE SEGMENT 1 AND PHASE SEGMENT 2
+The two phase segments, PS1 and PS2 are used to
+compensate for edge phase errors on the bus. PS1 can
+be lengthened or PS2 can be shortened by resyncronization.
+PS1 is programmable from 1 - 8TQ and PS2 is
+programmable from 2 - 8TQ.
 // Initialize CAN Timing  
 //  Setting Baud Rate
 //  125 Kbps @ 16MHz 
+
+
+// Thus the timeline for the CAN bit is:
+//  1           1   4       2   = 8 TQ = 1 MBits/s
+// SyncSeg  PropSeg SEG1    SEG2
+
 
 //BRGCON1
 
