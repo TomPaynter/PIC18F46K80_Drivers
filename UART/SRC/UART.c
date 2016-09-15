@@ -1,41 +1,58 @@
+#include <pic18f46k80.h>
+
 /*
 UART on EUSART1
-250 kbps
-16 MHz Fosc
+9600 bps
+8 MHz Fosc
 */
 
 void uartInitialisation(void) {
 
   //Enabling UART
   RCSTA1bits.SPEN = 1;
-  TRISBITS.TRISC6 = 0;
-  TRISbits.TRISC7 = 0;
   
+  //Setting TRIS to output
+  TRISCbits.TRISC6 = 0;
+  TRISCbits.TRISC7 = 0;
+
   //Setting Asynchronous
-  TXTA1 = 0b00000000;
+  TXSTA1 = 0b00100000;
   RCSTA1 = 0b10010000;
   BAUDCON1 = 0b00001000;
   
-  //Setting Baudrate
+  //Setting Baudrate for 9600 @ Fosc = 8 MHz
   SPBRGH1 = 0;
-  SPBRG1 = 3;
-}
-
-void uartTransmitByte(uint8_t data) {
-  //Double check that the buffer is free, if now hang here.
-  while(TXTA1bits.TRMT == 0);
-
-  TXTA1bits.TXEN = 1; //TODO Could put this in initialisation?
-  TXREG1 = data; //This automatically initiates transmission
-}
-
-int uartRecieveByte(uint8_t $data) {
-  if(RC1IF == 1) {
-    data = RCREG1;
-    return 1;
-  }
+  SPBRG1 = 51;
   
-  else {
-    return 0;
-  }
+  return;
+}
+
+void uartTransmitByte(unsigned char data) {
+  //Double check that the buffer is free, if now hang here.
+  while(TXSTA1bits.TRMT == 0);
+
+  //Load output buffer
+  TXREG1 = data; //This automatically initiates transmission
+  
+  return; 
+}
+
+unsigned char uartRecieveByte(unsigned char *data) {
+    if(RC1IF == 1) {
+        //Check for read corruption
+        if(RCSTA1bits.OERR || RCSTA1bits.FERR){
+          RCSTA1bits.CREN = 0;
+          RCSTA1bits.CREN = 1;
+
+          return 2;
+        }
+
+      *data = RCREG1;
+
+      return 1;
+    }
+
+    else {
+      return 0;
+    }
 }
