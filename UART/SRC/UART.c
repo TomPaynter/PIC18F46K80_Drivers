@@ -1,4 +1,6 @@
 #include <pic18f46k80.h>
+#include <xc.h>
+#include "UART.h"
 
 /*
 UART on EUSART1

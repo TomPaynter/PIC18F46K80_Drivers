@@ -1,4 +1,4 @@
-#include<pic18f46k80.h>
+#include <pic18f46k80.h>
 #include <xc.h>
 #include "CAN.h"
 
