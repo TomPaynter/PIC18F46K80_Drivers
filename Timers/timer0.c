@@ -26,7 +26,7 @@ void timer0Init(void) {
   RCONbits.IPEN = 1;
 
 }
-/*Example ONLY!!!
+/*Interrupt Example ONLY!!!
 
 // Low priority interrupt
 void interrupt low_priority LPISR(void)
@@ -38,10 +38,21 @@ void interrupt low_priority LPISR(void)
 }
 
 //High priority interrupt
-void interrupt HPISR(void) 
+void interrupt HPISR(void)
 {
     ///Timer0
     if(INTCONbits.T0IF && INTCONbits.T0IE) {
         INTCONbits.T0IF = 0;            // Clear the interrupt flag
     }
 }
+*/
+
+/* Accessing Timer registers Always read the low byte first as this triggers
+ * an atomic transfer of the timer into the high byteDO THIS FIRST, a read of the low
+
+a = TMR0L;
+b = TMR0H;
+
+time = TMR0H * 256 + TMR0L
+
+*/
