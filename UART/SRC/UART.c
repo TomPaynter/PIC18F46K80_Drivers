@@ -23,8 +23,12 @@ void uartInitialisation(void) {
   BAUDCON1 = 0b00001000;
   
   //Setting Baudrate for 9600 @ Fosc = 8 MHz
+  //SPBRGH1 = 0;
+  //SPBRG1 = 51;
+  
+ //Setting Baudrate for 9600 @ Fosc = 16 MHz
   SPBRGH1 = 0;
-  SPBRG1 = 51;
+  SPBRG1 = 103;
   
   return;
 }
