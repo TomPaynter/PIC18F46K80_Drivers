@@ -271,3 +271,23 @@ void CAN_Receive(unsigned char ID)
 
   
 }
+
+#Troubleshooting
+##Oscillating CAN Line
+This occurred when the PIC couldn't pull up the TX pin of the transciever fast enough.  As a result the PIC misinterpreted this as the bus remaining in a dominant state and putting the PIC into a continous loop trying to re send the data.
+
+The simple solution was to add a 4.7 k pullup to the TX line. The RX line seemed fine. 
+
+##Continuous ReTransmit
+There is actually an ACK bit in the final stages of the message,  if no node is listening for it then that ACK doesn't get asserted to dominant state and thus the PIC assumes no one read it and keeps repeating itself. 
+
+##High Speed RXBIF Polling
+When continously looping, pooling for new data the pic would totally crash.  The solution was to use an interrupt
+
+##Slew Controll
+
+Removed in an attempt to speed up transitions,  but proved unneeded. 
+
+##Common Ground
+
+Yea, nah it's a differential signal! 
