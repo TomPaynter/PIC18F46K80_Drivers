@@ -35,12 +35,20 @@ void uartInitialisation(void) {
 
 void uartTransmitByte(unsigned char data) {
   //Double check that the buffer is free, if now hang here.
+  while(TXSTA2bits.TRMT == 0);
+
+  //Load output buffer
+  TXREG2 = data; //This automatically initiates transmission
+  
+  return; 
+  /*
+  //Double check that the buffer is free, if now hang here.
   while(TXSTA1bits.TRMT == 0);
 
   //Load output buffer
   TXREG1 = data; //This automatically initiates transmission
   
-  return; 
+  return;  */
 }
 
 unsigned char uartRecieveByte(unsigned char *data) {

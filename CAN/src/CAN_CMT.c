@@ -1,6 +1,6 @@
 #include <pic18f46k80.h>
 #include <xc.h>
-#include "CAN.h"
+#include "CAN_CMT.h"
 
 
 extern unsigned char data1[8], data2[8];
@@ -35,7 +35,7 @@ void CAN_Initialise()
 
     //BRGCON2
     BRGCON2bits.SEG2PHTS = 1; // Makes the SEG2 fully programmable
-    BRGCON2bits.SAM = 0; // On reception the bit is sampled once at the intersection of SEG1 and SEG2
+    BRGCON2bits.SAM = 1; // On reception the bit is sampled once at the intersection of SEG1 and SEG2
     BRGCON2bits.SEG1PH = 0b011; // SEG1 is 4*TQ
     BRGCON2bits.PRSEG = 0b000; // Propogation time is 1*TQ
 

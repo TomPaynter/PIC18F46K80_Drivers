@@ -29,7 +29,7 @@ void CAN_Initialise()
 
     //BRGCON2
     BRGCON2bits.SEG2PHTS = 1; // Makes the SEG2 fully programmable
-    BRGCON2bits.SAM = 0; // On reception the bit is sampled once at the intersection of SEG1 and SEG2
+    BRGCON2bits.SAM = 1; // On reception the bit is sampled once at the intersection of SEG1 and SEG2
     BRGCON2bits.SEG1PH = 0b011; // SEG1 is 4*TQ
     BRGCON2bits.PRSEG = 0b000; // Propogation time is 1*TQ
 
@@ -43,7 +43,7 @@ void CAN_Initialise()
     // SyncSeg  PropSeg SEG1    SEG2
 
 
-    BSEL0 = 0b11111100;                   //1=TX, 0=RX
+    BSEL0 = 0b00000000;                   //1=TX, 0=RX
 
 
     /* Initialize Receive Masks
@@ -69,7 +69,7 @@ void CAN_Initialise()
     Thus the whole SID  is 0000000000100000.*/
 
     RXF0SIDH = 0b00000000; // Set to ID1
-    RXF0SIDL = 0b00100000;
+    RXF0SIDL = 0b01100000;
 
     // Assign Filters to Buffers
     RXFBCON0 = 0b11110000;         //Assign Filter 0 to RXB0
@@ -96,7 +96,7 @@ void CAN_Initialise()
 void CAN_Transmit(unsigned char *data, unsigned int SID, unsigned char DLC)
 {
   //Wait for last message to clear
-  while(TXB0CONbits.TXREQ == 1);
+  //while(TXB0CONbits.TXREQ == 1);
 
   //Set up the transmit ID
   TXB0SIDH = (SID / 8) & 0b11111111;     //Thus the SID is 00110010 110 = 406
@@ -126,7 +126,7 @@ unsigned char CAN_Receive(unsigned char *data, unsigned char *DLC)
 // If there is then it copies register RXBn into the array data1[8]
 
   if (RXB0CONbits.RXFUL) {         // receive buffer 0
-    DLC = RXB0DLCbits.DLC
+    *DLC = RXB0DLCbits.DLC;
     data[0] = RXB0D0;
     data[1] = RXB0D1;
     data[2] = RXB0D2;
@@ -143,4 +143,18 @@ unsigned char CAN_Receive(unsigned char *data, unsigned char *DLC)
   }
 
   return 0;
+}
+
+void CAN_Change_Mask(unsigned int mask) {
+  RXM0SIDH = (mask / 8) & 0b11111111;
+  RXM0SIDL = (mask * 5) & 0b11100000;
+
+  return;
+}
+
+void CAN_Change_Filter(unsigned int filter) {
+  RXF0SIDH = (filter / 8) & 0b11111111;
+  RXF0SIDL = (filter * 5) & 0b11100000;
+
+  return;
 }
