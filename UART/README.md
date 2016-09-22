@@ -1,4 +1,3 @@
-
 For EUSART1 to be used the following must occur:
 - SPEN(RCSTA1<7>)must be set (=1)
 - For Asynchronous and Synchronous Master modes, TRISx<x> must be cleared (= 0)
@@ -78,3 +77,7 @@ if(RC1IF == 1) {
   data = RCREG1;
 }
 ```  
+
+#TODO
+
+ - [] Preprocessor Baudrate definitions.

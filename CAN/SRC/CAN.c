@@ -5,6 +5,10 @@
 void CAN_Initialise()
 {
 
+    //Set TRIS to input, CAN TX will fix itself
+    TRISBbits.TRISB2 = 1;
+    TRISBbits.TRISB3 = 1;
+
     /*CAN needs to be in CONFIG mode to edit the following settings.
     * We do that by editing CANCONbits.REQOP (Bits 7-5).*/
     CANCON = 0b10000000;
@@ -29,7 +33,7 @@ void CAN_Initialise()
 
     //BRGCON2
     BRGCON2bits.SEG2PHTS = 1; // Makes the SEG2 fully programmable
-    BRGCON2bits.SAM = 1; // On reception the bit is sampled once at the intersection of SEG1 and SEG2
+    BRGCON2bits.SAM = 1; // On reception the bit is sampled 3 times, twice before and one on at the intersection of SEG1 and SEG2, majority rules.
     BRGCON2bits.SEG1PH = 0b011; // SEG1 is 4*TQ
     BRGCON2bits.PRSEG = 0b000; // Propogation time is 1*TQ
 
@@ -68,8 +72,8 @@ void CAN_Initialise()
     bits SID<10:3> lie in RXFnSIDH and SID<2:0> are in MSBs of RXFnSIDL.
     Thus the whole SID  is 0000000000100000.*/
 
-    RXF0SIDH = 0b00000000; // Set to ID1
-    RXF0SIDL = 0b01100000;
+    RXF0SIDH = 0b00000000; // Set to ID1, however due to masks is irrelevant
+    RXF0SIDL = 0b00100000;
 
     // Assign Filters to Buffers
     RXFBCON0 = 0b11110000;         //Assign Filter 0 to RXB0
@@ -87,6 +91,9 @@ void CAN_Initialise()
     // Now we can set CAN back to normal mode and this allows it to actually use it.
     CANCON = 0b0000000;
 
+    // Enable RXB0 interrupt
+    PIE5bits.RXB0IE = 1;
+
     //Another while loop to check CANSTATbits.OPMODE,
     //and wait for it to change to 0b000 before continuing.
     while(!(CANSTATbits.OPMODE==0b000));
@@ -100,7 +107,7 @@ void CAN_Transmit(unsigned char *data, unsigned int SID, unsigned char DLC)
 
   //Set up the transmit ID
   TXB0SIDH = (SID / 8) & 0b11111111;     //Thus the SID is 00110010 110 = 406
-  TXB0SIDL = (SID * 5) & 0b11100000;
+  TXB0SIDL = (SID * 32) & 0b11100000;
 
   TXB0DLC = DLC;                //Thus DLC bytes will be sent! (This is the max)
 
@@ -120,7 +127,7 @@ void CAN_Transmit(unsigned char *data, unsigned int SID, unsigned char DLC)
   TXB0CONbits.TXREQ = 1;          //Set the buffer to transmit
 }
 
-unsigned char CAN_Receive(unsigned char *data, unsigned char *DLC)
+unsigned char CAN_Receive_POLL(unsigned char *data, unsigned char *DLC)
 {
 // Checks if there is data in buffer number [buffer].
 // If there is then it copies register RXBn into the array data1[8]
@@ -147,14 +154,41 @@ unsigned char CAN_Receive(unsigned char *data, unsigned char *DLC)
 
 void CAN_Change_Mask(unsigned int mask) {
   RXM0SIDH = (mask / 8) & 0b11111111;
-  RXM0SIDL = (mask * 5) & 0b11100000;
+  RXM0SIDL = (mask * 32) & 0b11100000;
 
   return;
 }
 
 void CAN_Change_Filter(unsigned int filter) {
   RXF0SIDH = (filter / 8) & 0b11111111;
-  RXF0SIDL = (filter * 5) & 0b11100000;
+  RXF0SIDL = (filter * 32) & 0b11100000;
 
   return;
 }
+
+/*
+void CAN_Receive_INT(void)
+{
+// This ought to be placed in an interrupt routinge
+// It is provided here as an example, but may be implemented
+
+if ((RXB0CONbits.RXFUL == 1) && (PIE5bits.RXB0IE == 1) && (PIR5bits.RXB0IF)) {
+
+    CAN_DLC = RXB0DLCbits.DLC;
+    CAN_data[0] = RXB0D0;
+    CAN_data[1] = RXB0D1;
+    CAN_data[2] = RXB0D2;
+    CAN_data[3] = RXB0D3;
+    CAN_data[4] = RXB0D4;
+    CAN_data[5] = RXB0D5;
+    CAN_data[6] = RXB0D6;
+    CAN_data[7] = RXB0D7;
+
+    CAN_SID = ((RXB0SIDL / 32) & 0b111 | (RXB0SIDH * 8)) & 0b11111111111;
+    
+    RXB0CONbits.RXFUL = 0;   // Mark the buffer as read, and no longer contains a new message
+    PIR5bits.RXB0IF = 0;     // reset receive buffer 0 interrupt flag
+
+    return;
+  }
+} */
