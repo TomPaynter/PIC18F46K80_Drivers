@@ -91,9 +91,12 @@ void CAN_Initialise()
     // Now we can set CAN back to normal mode and this allows it to actually use it.
     CANCON = 0b0000000;
 
-    // Enable RXB0 interrupt
-    PIE5bits.RXB0IE = 1;
-
+    // Enable RXB0 interrupt to low priority.
+    PIR5bits.RXBnIF = 0;
+    PIE5bits.RXBnIE = 1;
+    IPR5bits.RXBnIP = 0;
+    BIE0bits.RXB0IE = 1;
+    
     //Another while loop to check CANSTATbits.OPMODE,
     //and wait for it to change to 0b000 before continuing.
     while(!(CANSTATbits.OPMODE==0b000));
